@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --header-bg: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.3);
+            --text-color: white;
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.3);
+            --modal-bg: white;
+            --modal-text: #333;
+            --restore-info-bg: rgba(255, 193, 7, 0.1);
+            --restore-info-border: #ffc107;
+            --restore-info-text: #ffc107;
+        }
+        body.dark-mode {
+            --bg-color: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --header-bg: rgba(0, 0, 0, 0.2);
+            --card-bg: rgba(0, 0, 0, 0.2);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --text-color: #e0e0e0;
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --modal-bg: #333;
+            --modal-text: #e0e0e0;
+            --restore-info-bg: rgba(255, 193, 7, 0.15);
+        }
+        body { font-family: 'Arial', sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; transition: background 0.3s ease; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .header { background: var(--header-bg); backdrop-filter: blur(10px); border-radius: 15px; padding: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 2.5em; font-weight: bold; }
+        .header-controls { display: flex; align-items: center; gap: 15px; }
+        .theme-toggle { background: var(--header-bg); border: 2px solid var(--border-color); border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 1.2em; transition: all 0.3s ease; }
+        .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; color: var(--text-color); transition: all 0.3s ease; }
+        .btn-back { background: var(--header-bg); border: 2px solid var(--border-color); }
+        .dashboard-section { background: var(--card-bg); backdrop-filter: blur(10px); border-radius: 15px; padding: 30px; }
+        h2 { font-size: 2em; margin-bottom: 25px; text-align: center; }
+        .dashboard-tabs { display: flex; justify-content: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap; }
+        .dashboard-tabs button { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .dashboard-tabs button.active { background: linear-gradient(45deg, #4CAF50, #45a049); border-color: #4CAF50; }
+        .data-table-container { overflow-x: auto; margin-top: 20px; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .data-table th { background: var(--header-bg); text-transform: uppercase; }
+        .data-table img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+        .action-buttons { display: flex; gap: 5px; }
+        .action-buttons .btn { padding: 6px 12px; font-size: 0.8em; }
+        .link-container { display: flex; align-items: center; gap: 5px; min-width: 300px; }
+        .link-input { flex-grow: 1; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 5px; padding: 6px; color: var(--text-color); font-family: 'Courier New', monospace; }
+        .btn-copy { background: #009688; }
+        .btn-add-user { background: linear-gradient(45deg, #2196F3, #1976D2); }
+        .btn-download { background: linear-gradient(45deg, #009688, #00796b); }
+        .btn-delete { background: linear-gradient(45deg, #f44336, #d32f2f); }
+        .btn-edit-user { background: linear-gradient(45deg, #ff9800, #fb8c00); }
+        .restore-info { background: var(--restore-info-bg); border: 1px solid var(--restore-info-border); color: var(--restore-info-text); padding: 20px; border-radius: 10px; margin-top: 30px; }
+        .restore-info h3 { margin-top: 0; }
+        .restore-info code { background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; }
+        .notification { position: fixed; top: 20px; right: 20px; padding: 15px 20px; border-radius: 10px; color: white; font-weight: bold; z-index: 1001; transform: translateX(120%); transition: transform 0.3s ease; }
+        .notification.show { transform: translateX(0); }
+        .notification.success { background: #4CAF50; }
+        .notification.error { background: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Admin Dashboard</div>
+            <div class="header-controls">
+                <div class="theme-toggle" onclick="toggleTheme()"><i id="themeIcon"></i></div>
+                <a href="/" class="btn btn-back">Back to Home</a>
+            </div>
+        </div>
+        <div class="dashboard-section">
+            <h2>Dashboard Overview</h2>
+            <div class="dashboard-tabs">
+                <button id="imagesTabBtn" onclick="showTab('images')">Manage Images</button>
+                <button id="usersTabBtn" onclick="showTab('users')">Manage Users</button>
+                <button id="backupsTabBtn" onclick="showTab('backups')">Manage Backups</button>
+            </div>
+            <div id="imagesContent" style="display: none;"></div>
+            <div id="usersContent" style="display: none;"></div>
+            <div id="backupsContent" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <div class="user-modal" id="userModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000;">
+        <div class="modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--modal-bg); padding: 30px; border-radius: 15px; min-width: 350px; color: var(--modal-text); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="text-align: center; margin-bottom: 20px;"><h2 id="userModalTitle" style="margin: 0;">Edit User</h2></div>
+            <div style="margin-bottom: 15px;"><label for="modalUsername" style="display: block; margin-bottom: 5px;">Username:</label><input type="text" id="modalUsername" placeholder="Enter username" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); box-sizing: border-box;"></div>
+            <div style="margin-bottom: 15px;"><label for="modalPassword" style="display: block; margin-bottom: 5px;">Password:</label><input type="password" id="modalPassword" placeholder="Leave blank for no change" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); box-sizing: border-box;"></div>
+            <div style="margin-bottom: 15px;"><label for="modalRole" style="display: block; margin-bottom: 5px;">Role:</label><select id="modalRole" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-color); box-sizing: border-box;"><option value="user">User</option><option value="admin">Admin</option></select></div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="btn" id="userModalSubmitBtn" onclick="submitUserForm()" style="background: linear-gradient(45deg, #4CAF50, #45a049);">Submit</button>
+                <button class="btn" onclick="hideUserModal()" style="background: linear-gradient(45deg, #888, #666);">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <div id="notification"></div>
+
+    <script>
+        let adminToken = localStorage.getItem('userToken') || localStorage.getItem('adminToken');
+        let currentPage = { images: 1, users: 1 };
+        let itemsPerPage = 10;
+        let totalCounts = { images: 0, users: 0 };
+        let currentUserId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!adminToken) {
+                showNotification('Admin authentication required.', 'error');
+                setTimeout(() => window.location.href = '/', 2000);
+                return;
+            }
+            initializeTheme();
+            showTab('images'); 
+        });
+
+        function showTab(tabName) {
+            ['imagesContent', 'usersContent', 'backupsContent'].forEach(id => document.getElementById(id).style.display = 'none');
+            ['imagesTabBtn', 'usersTabBtn', 'backupsTabBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+            document.getElementById(`${tabName}Content`).style.display = 'block';
+            document.getElementById(`${tabName}TabBtn`).classList.add('active');
+            fetchDataForTab(tabName);
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+            document.getElementById('themeIcon').className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            initializeTheme();
+        }
+
+        async function fetchDataForTab(tabName) {
+            const page = currentPage[tabName] || 1;
+            let endpoint = '';
+            if (tabName === 'images') endpoint = `/admin/api/dashboard?page=${page}&limit=${itemsPerPage}`;
+            if (tabName === 'users') endpoint = `/admin/api/users?page=${page}&limit=${itemsPerPage}`;
+            if (tabName === 'backups') endpoint = `/admin/api/list_backups`;
+
+            try {
+                const response = await fetch(endpoint, { headers: { 'Authorization': `Bearer ${adminToken}` } });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Failed to fetch data');
+
+                if (tabName === 'images') renderImages(data);
+                if (tabName === 'users') renderUsers(data);
+                if (tabName === 'backups') renderBackups(data);
+            } catch (error) { showNotification(error.message, 'error'); }
+        }
+        
+        function renderImages(data) {
+            totalCounts.images = data.stats.total_images;
+            document.getElementById('imagesContent').innerHTML = `
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Preview</th><th>Image Link</th><th>Uploaded By</th><th>Actions</th></tr></thead>
+                        <tbody>${data.images.map(img => {
+                            const imageUrl = `${window.location.origin}/uploads/${img.filename}`;
+                            return `<tr>
+                                <td><img src="${imageUrl}" alt="preview"></td>
+                                <td><div class="link-container"><input type="text" class="link-input" value="${imageUrl}" readonly><button class="btn btn-copy" onclick="copyToClipboard('${imageUrl}')"><i class="fas fa-copy"></i></button></div></td>
+                                <td>${img.username || 'N/A'}</td>
+                                <td class="action-buttons"><button class="btn btn-delete" onclick="deleteImage('${img.filename}', ${img.id})">Delete</button></td>
+                            </tr>`;
+                        }).join('') || '<tr><td colspan="4" style="text-align: center;">No images found.</td></tr>'}</tbody>
+                    </table>
+                </div>${renderPagination('images')}`;
+        }
+
+        function renderUsers(data) {
+            totalCounts.users = data.stats.total_users;
+            document.getElementById('usersContent').innerHTML = `
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button class="btn btn-add-user" onclick="showUserModal('add')"><i class="fas fa-user-plus"></i> Add New User</button>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
+                        <tbody>${data.users.map(user => `
+                            <tr>
+                                <td>${user.id}</td><td>${user.username}</td><td>${user.role}</td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-edit-user" onclick="showUserModal('edit', ${user.id}, '${user.username}', '${user.role}')">Edit</button>
+                                    <button class="btn btn-delete" onclick="deleteUser(${user.id}, '${user.username}')">Delete</button>
+                                </td>
+                            </tr>`).join('') || '<tr><td colspan="4" style="text-align: center;">No users found.</td></tr>'}</tbody>
+                    </table>
+                </div>${renderPagination('users')}`;
+        }
+        
+        function renderBackups(data) {
+            document.getElementById('backupsContent').innerHTML = `
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <button class="btn btn-add-user" onclick="createBackup(this)"><i class="fas fa-plus"></i> Create New Backup</button>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Filename</th><th>Size</th><th>Date</th><th>Actions</th></tr></thead>
+                        <tbody>${data.backups.map(b => `
+                            <tr>
+                                <td><i class="fas fa-file-archive"></i> ${b.filename}</td>
+                                <td>${(b.size / 1024 / 1024).toFixed(2)} MB</td>
+                                <td>${new Date(b.date).toLocaleString()}</td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-download" onclick="downloadBackup('${b.filename}')"><i class="fas fa-download"></i> Download</button>
+                                    <button class="btn btn-delete" onclick="deleteBackup('${b.filename}')"><i class="fas fa-trash"></i> Delete</button>
+                                </td>
+                            </tr>`).join('') || '<tr><td colspan="4" style="text-align: center;">No backups found.</td></tr>'}</tbody>
+                    </table>
+                </div>
+                <div class="restore-info"><h3><i class="fas fa-exclamation-triangle"></i> How to Safely Restore a Backup</h3><p>Automated restoration is dangerous. Follow these manual steps:</p><ol><li>Download the desired backup.</li><li>Stop the web server.</li><li>Unzip the file and replace your <code>database.db</code> and <code>public/uploads</code> folder.</li><li>Restart the server.</li></ol></div>`;
+        }
+
+        function renderPagination(tabName) {
+            const total = totalCounts[tabName];
+            if (!total) return '';
+            const current = currentPage[tabName];
+            const totalPages = Math.ceil(total / itemsPerPage);
+            if (totalPages <= 1) return '';
+            return `<div style="display: flex; justify-content: center; margin-top: 20px; gap: 10px; align-items: center;">
+                <button class="btn" onclick="changePage('${tabName}', ${current - 1})" ${current === 1 ? 'disabled' : ''}>Previous</button>
+                <span>Page ${current} of ${totalPages}</span>
+                <button class="btn" onclick="changePage('${tabName}', ${current + 1})" ${current >= totalPages ? 'disabled' : ''}>Next</button>
+            </div>`;
+        }
+        function changePage(tabName, newPage) { currentPage[tabName] = newPage; fetchDataForTab(tabName); }
+
+        function showUserModal(mode, id = null, username = '', role = 'user') {
+            const modal = document.getElementById('userModal');
+            currentUserId = id;
+            document.getElementById('modalUsername').value = username;
+            document.getElementById('modalRole').value = role;
+            document.getElementById('modalPassword').value = '';
+            if (mode === 'add') {
+                document.getElementById('userModalTitle').textContent = 'Add New User';
+                document.getElementById('modalPassword').placeholder = 'Enter password';
+            } else {
+                document.getElementById('userModalTitle').textContent = `Edit User: ${username}`;
+                document.getElementById('modalPassword').placeholder = 'Leave blank for no change';
+            }
+            modal.style.display = 'block';
+        }
+        function hideUserModal() { document.getElementById('userModal').style.display = 'none'; currentUserId = null; }
+        async function submitUserForm() {
+            const username = document.getElementById('modalUsername').value;
+            const password = document.getElementById('modalPassword').value;
+            const role = document.getElementById('modalRole').value;
+            if (!username) { return showNotification('Username is required', 'error'); }
+            const endpoint = (currentUserId === null) ? '/admin/api/add_user' : '/admin/api/edit_user';
+            let body = (currentUserId === null) ? { username, password, role } : { id: currentUserId, username, role };
+            if (currentUserId !== null && password) { body.password = password; }
+            if (currentUserId === null && !password) { return showNotification('Password is required for new users', 'error'); }
+            try {
+                const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` }, body: JSON.stringify(body) });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                showNotification(data.message || 'Operation successful!', 'success');
+                hideUserModal();
+                fetchDataForTab('users');
+            } catch (error) { showNotification(error.message, 'error'); }
+        }
+        
+        function showNotification(message, type) {
+            const el = document.getElementById('notification');
+            el.className = `notification show ${type}`;
+            el.textContent = message;
+            setTimeout(() => { el.classList.remove('show'); }, 3000);
+        }
+        function copyToClipboard(text) { navigator.clipboard.writeText(text).then(() => showNotification('Link copied!', 'success'), () => showNotification('Copy failed.', 'error')); }
+        
+        async function deleteImage(filename, id) {
+            if (!confirm(`Delete image "${filename}"?`)) return;
+            try {
+                const response = await fetch('/admin/api/delete_image', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` }, body: JSON.stringify({ filename, id }) });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                showNotification('Image deleted.', 'success');
+                fetchDataForTab('images');
+            } catch (error) { showNotification(error.message, 'error'); }
+        }
+        async function deleteUser(id, username) {
+            if (!confirm(`Delete user "${username}"?`)) return;
+            try {
+                const response = await fetch('/admin/api/delete_user', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` }, body: JSON.stringify({ id }) });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                showNotification('User deleted.', 'success');
+                fetchDataForTab('users');
+            } catch (error) { showNotification(error.message, 'error'); }
+        }
+        async function createBackup(button) {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+            try {
+                const response = await fetch('/admin/api/create_backup', { method: 'POST', headers: { 'Authorization': `Bearer ${adminToken}` } });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                showNotification(data.message, 'success');
+                fetchDataForTab('backups');
+            } catch (error) { showNotification(error.message, 'error'); }
+            finally { button.disabled = false; button.innerHTML = '<i class="fas fa-plus"></i> Create New Backup'; }
+        }
+        function downloadBackup(filename) { window.location.href = `/admin/api/download_backup?filename=${encodeURIComponent(filename)}&token=${adminToken}`; }
+        async function deleteBackup(filename) {
+            if (!confirm(`Delete backup "${filename}"?`)) return;
+            try {
+                const response = await fetch('/admin/api/delete_backup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` }, body: JSON.stringify({ filename }) });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                showNotification('Backup deleted.', 'success');
+                fetchDataForTab('backups');
+            } catch (error) { showNotification(error.message, 'error'); }
+        }
+    </script>
+</body>
+</html>
