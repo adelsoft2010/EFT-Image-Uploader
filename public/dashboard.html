@@ -66,6 +66,48 @@
         .notification.show { transform: translateX(0); }
         .notification.success { background: #4CAF50; }
         .notification.error { background: #f44336; }
+		/* Responsive Styles for Dashboard on Mobile */
+@media (max-width: 768px) {
+    .data-table thead {
+        display: none; /* إخفاء العناوين الرئيسية للجدول */
+    }
+    .data-table, .data-table tbody, .data-table tr, .data-table td {
+        display: block;
+        width: 100%;
+    }
+    .data-table tr {
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 10px;
+        background: rgba(0,0,0,0.1);
+    }
+    .data-table td {
+        text-align: right; /* محاذاة النص لليمين */
+        padding-left: 50%; /* إعطاء مساحة للعنوان */
+        position: relative;
+        border-bottom: 1px dotted var(--border-color);
+    }
+    .data-table td:last-child {
+        border-bottom: none;
+    }
+    .data-table td::before {
+        content: attr(data-label); /* عرض العنوان الذي أضفناه */
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+    .action-buttons {
+        justify-content: flex-end; /* محاذاة الأزرار لليمين */
+    }
+    .link-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
     </style>
 </head>
 <body>
@@ -159,45 +201,47 @@
             } catch (error) { showNotification(error.message, 'error'); }
         }
         
-        function renderImages(data) {
-            totalCounts.images = data.stats.total_images;
-            document.getElementById('imagesContent').innerHTML = `
-                <div class="data-table-container">
-                    <table class="data-table">
-                        <thead><tr><th>Preview</th><th>Image Link</th><th>Uploaded By</th><th>Actions</th></tr></thead>
-                        <tbody>${data.images.map(img => {
-                            const imageUrl = `${window.location.origin}/uploads/${img.filename}`;
-                            return `<tr>
-                                <td><img src="${imageUrl}" alt="preview"></td>
-                                <td><div class="link-container"><input type="text" class="link-input" value="${imageUrl}" readonly><button class="btn btn-copy" onclick="copyToClipboard('${imageUrl}')"><i class="fas fa-copy"></i></button></div></td>
-                                <td>${img.username || 'N/A'}</td>
-                                <td class="action-buttons"><button class="btn btn-delete" onclick="deleteImage('${img.filename}', ${img.id})">Delete</button></td>
-                            </tr>`;
-                        }).join('') || '<tr><td colspan="4" style="text-align: center;">No images found.</td></tr>'}</tbody>
-                    </table>
-                </div>${renderPagination('images')}`;
+function renderImages(data) {
+    totalCounts.images = data.stats.total_images;
+    document.getElementById('imagesContent').innerHTML = `
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead><tr><th>Preview</th><th>Image Link</th><th>Uploaded By</th><th>Actions</th></tr></thead>
+                <tbody>${data.images.map(img => {
+                    const imageUrl = `${window.location.origin}/uploads/${img.filename}`;
+                    return `<tr>
+                        <td data-label="Preview"><img src="${imageUrl}" alt="preview"></td>
+                        <td data-label="Image Link"><div class="link-container"><input type="text" class="link-input" value="${imageUrl}" readonly><button class="btn btn-copy" onclick="copyToClipboard('${imageUrl}')"><i class="fas fa-copy"></i></button></div></td>
+                        <td data-label="Uploaded By">${img.username || 'N/A'}</td>
+                        <td data-label="Actions" class="action-buttons"><button class="btn btn-delete" onclick="deleteImage('${img.filename}', ${img.id})">Delete</button></td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="4" style="text-align: center;">No images found.</td></tr>'}</tbody>
+            </table>
+        </div>${renderPagination('images')}`;
         }
 
         function renderUsers(data) {
-            totalCounts.users = data.stats.total_users;
-            document.getElementById('usersContent').innerHTML = `
-                <div style="text-align: right; margin-bottom: 20px;">
-                    <button class="btn btn-add-user" onclick="showUserModal('add')"><i class="fas fa-user-plus"></i> Add New User</button>
-                </div>
-                <div class="data-table-container">
-                    <table class="data-table">
-                        <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
-                        <tbody>${data.users.map(user => `
-                            <tr>
-                                <td>${user.id}</td><td>${user.username}</td><td>${user.role}</td>
-                                <td class="action-buttons">
-                                    <button class="btn btn-edit-user" onclick="showUserModal('edit', ${user.id}, '${user.username}', '${user.role}')">Edit</button>
-                                    <button class="btn btn-delete" onclick="deleteUser(${user.id}, '${user.username}')">Delete</button>
-                                </td>
-                            </tr>`).join('') || '<tr><td colspan="4" style="text-align: center;">No users found.</td></tr>'}</tbody>
-                    </table>
-                </div>${renderPagination('users')}`;
-        }
+    totalCounts.users = data.stats.total_users;
+    document.getElementById('usersContent').innerHTML = `
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button class="btn btn-add-user" onclick="showUserModal('add')"><i class="fas fa-user-plus"></i> Add New User</button>
+        </div>
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
+                <tbody>${data.users.map(user => `
+                    <tr>
+                        <td data-label="ID">${user.id}</td>
+                        <td data-label="Username">${user.username}</td>
+                        <td data-label="Role">${user.role}</td>
+                        <td data-label="Actions" class="action-buttons">
+                            <button class="btn btn-edit-user" onclick="showUserModal('edit', ${user.id}, '${user.username}', '${user.role}')">Edit</button>
+                            <button class="btn btn-delete" onclick="deleteUser(${user.id}, '${user.username}')">Delete</button>
+                        </td>
+                    </tr>`).join('') || '<tr><td colspan="4" style="text-align: center;">No users found.</td></tr>'}</tbody>
+            </table>
+        </div>${renderPagination('users')}`;
+}
         
         function renderBackups(data) {
             document.getElementById('backupsContent').innerHTML = `
