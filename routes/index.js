@@ -126,7 +126,11 @@ router.get('/', (req, res) => {
         .notification.success { background: #4CAF50; }
         .notification.error { background: #f44336; }
 		/* Responsive Styles for Mobile */
+/* --- Responsive Styles for Mobile --- */
 @media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
     .header, .upload-controls, .image-item {
         flex-direction: column;
         gap: 20px;
@@ -134,19 +138,27 @@ router.get('/', (req, res) => {
     .logo {
         font-size: 1.8em;
         text-align: center;
+        margin-bottom: 10px;
     }
     .user-controls {
         flex-wrap: wrap;
         justify-content: center;
+        gap: 10px;
     }
-    .container {
-        padding: 10px;
+    .upload-area {
+        min-height: 200px; /* زيادة ارتفاع منطقة الرفع */
+    }
+    .btn-upload {
+        width: 100%;
+        padding: 15px; /* تكبير زر الرفع */
+    }
+    .image-item {
+        align-items: center;
     }
     .image-preview {
         width: 100%;
         max-width: 200px;
         height: auto;
-        margin: 0 auto 10px auto;
     }
     .link-input-container {
         flex-direction: column;
