@@ -125,6 +125,36 @@ router.get('/', (req, res) => {
         .notification.show { transform: translateX(0); }
         .notification.success { background: #4CAF50; }
         .notification.error { background: #f44336; }
+		/* Responsive Styles for Mobile */
+@media (max-width: 768px) {
+    .header, .upload-controls, .image-item {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .logo {
+        font-size: 1.8em;
+        text-align: center;
+    }
+    .user-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .container {
+        padding: 10px;
+    }
+    .image-preview {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        margin: 0 auto 10px auto;
+    }
+    .link-input-container {
+        flex-direction: column;
+    }
+    .btn-copy {
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
